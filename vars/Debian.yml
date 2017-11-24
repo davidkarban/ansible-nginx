@@ -1,0 +1,11 @@
+---
+__nginx_pkgs:
+    - nginx
+
+__nginx_service: "nginx"
+__nginx_conf_dir: "/etc/nginx/"
+__nginx_vhosts_dir: "/etc/nginx/sites-enabled"
+
+__nginx_owner: "nginx"
+__nginx_pid_path: "/run/nginx.pid"
+

@@ -1,0 +1,96 @@
+# {{ ansible_managed }}
+user {{ nginx_owner }};
+worker_processes {{ nginx_worker_processes }};
+pid {{ nginx_pid_path }};
+{% if nginx_rlimit_nofile %}
+
+# set higher open limit
+worker_rlimit_nofile {{ nginx_rlimit_nofile }};
+
+{% endif %}
+events {
+	worker_connections 1024;
+	# multi_accept on;
+}
+
+http {
+
+	##
+	# Basic Settings
+	##
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout {{ nginx_keepalive_timeout }};
+	types_hash_max_size 2048;
+	server_tokens off;
+	# allow bigger uploads
+	client_max_body_size {{ nginx_client_max_body_size }};
+
+	# server_names_hash_bucket_size 64;
+	# server_name_in_redirect off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	##
+	# Logging Settings
+	##
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log {{ nginx_debug_level }};
+
+	##
+	# Gzip Settings
+	##
+
+	gzip on;
+
+	gzip_vary on;
+	gzip_proxied any;
+	gzip_comp_level 6;
+	gzip_buffers 128 4k;
+	gzip_http_version 1.1;
+	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+	gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+
+{% if passenger is defined and passenger %}
+	##
+	# Phusion Passenger config
+	##
+	# Uncomment it if you installed passenger or passenger-enterprise
+	##
+
+	passenger_root /usr/lib/ruby/vendor_ruby/phusion_passenger/locations.ini;
+	passenger_ruby /usr/bin/ruby;
+
+	# setup path (if needed) - https://www.phusionpassenger.com/library/config/nginx/reference/#passenger_env_var
+	passenger_env_var PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games;
+{% endif %}
+
+{% if nginx_caching_proxy %}
+	proxy_cache_path  /var/cache/nginx  	levels=1:2    keys_zone=STATIC:10m
+						inactive=24h  max_size=10g;
+
+        # bigger file uploads
+        client_max_body_size 128M;
+
+        log_format upstreamlog '[$time_local] $remote_addr - $remote_user - $server_name  to: $upstream_addr: $request upstream_response_time $upstream_response_time msec $msec request_time $request_time';
+	access_log /var/log/nginx/upstream.log upstreamlog;
+{% endif %}
+
+{% if uwsgi is defined and uwsgi and nginx_uwsgi is defined and nginx_uwsgi %}
+        uwsgi_connect_timeout 500;
+        uwsgi_send_timeout 300;
+        uwsgi_read_timeout 300;
+{% endif %}
+
+	##
+	# Virtual Host Configs
+	##
+
+	include /etc/nginx/conf.d/*.conf;
+	include {{ nginx_vhosts_dir }}/*;
+}
+

@@ -1,0 +1,38 @@
+---
+nginx_ip: "*"
+nginx_ssl_ip: "*"
+nginx_port: 80
+nginx_ssl_port: 443
+
+## basic settings
+nginx_owner: "{{ __nginx_owner }}"
+
+# by default cpu count is used
+nginx_worker_processes: "{{ ansible_processor_vcpus }}"
+
+# Sets the maximum allowed size of the client request body, specified in the “Content-Length” request header field.
+# if you need uploads, set it to be bigger, than your maximum upload size.
+nginx_client_max_body_size: "10m"
+
+nginx_rlimit_nofile: false
+
+nginx_keepalive_timeout: "{{ _nginx_keepalive_timeout }}"
+
+nginx_pid_path: "{{ __nginx_pid_path }}"
+
+nginx_debug_level: "error"
+
+nginx_vhosts_dir: "{{ __nginx_vhosts_dir }}"
+
+## additional features
+nginx_proxy: false
+nginx_proxy_ip: "127.0.0.1"
+nginx_proxy_schema: "http"
+
+nginx_caching_proxy: false
+
+nginx_uwsgi: false
+
+
+
+

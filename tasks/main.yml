@@ -1,0 +1,73 @@
+---
+- name: Load the OS specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install the nginx packages on Debian derivates
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 600
+  with_items: '{{ __nginx_pkgs }}'
+  environment:
+    # prevent nginx from autostart after installation (do not know if work under systemd, worked before)
+    RUNLEVEL: 1
+  when: ansible_os_family == 'Debian'
+
+- name: Install the nginx packages on RedHat derivates
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: '{{ __nginx_pkgs }}'
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure vhosts directory do exists
+  file:
+    path: "{{ nginx_vhosts_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Load nginx caching proxy configuration if desired
+  template:
+    src: "caching_proxy.conf.j2"
+    dest: "{{ nginx_conf_dir }}/vhosts.d/caching_proxy.conf"
+  when: nginx_caching_proxy
+
+# Increase file open limits, if in caching proxy mode
+# limits, supported from ansible 2.0
+#- pam_limits: domain=nginx limit_type=soft limit_item=nofile value=10000
+#- pam_limits: domain=nginx limit_type=hard limit_item=nofile value=30000
+- name: Ensure nginx has enough file handles available for it`s use
+  lineinfile:
+    name: "/etc/security/limits.conf"
+    line: "{{ item }}"
+    backup: yes
+    state: present
+    insertbefore: "# End of file"
+  with_items: 
+    - "{{ nginx_owner }}    soft    nofile  10000"
+    - "{{ nginx_owner }}    hard    nofile  30000"
+  when: nginx_rlimit_nofile
+
+- name: Generate dhparam for SSL if not available
+  command: openssl dhparam -out /etc/nginx/dhparam.pem 2048
+    args:
+      creates: "/etc/nginx/dhparam.pem"
+
+- name: Load up nginx configuration
+  template:
+    src: "nginx.conf.j2"
+    dest: "{{ __nginx_conf_dir }}/nginx.conf"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify: reload nginx
+
+- name: Ensure nginx is started
+  service:
+    name: nginx
+    state: started
+    enabled: yes
