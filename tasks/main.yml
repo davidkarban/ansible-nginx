@@ -53,8 +53,8 @@
 
 - name: Generate dhparam for SSL if not available
   command: openssl dhparam -out /etc/nginx/dhparam.pem 2048
-    args:
-      creates: "/etc/nginx/dhparam.pem"
+  args:
+    creates: "/etc/nginx/dhparam.pem"
 
 - name: Load up nginx configuration
   template:

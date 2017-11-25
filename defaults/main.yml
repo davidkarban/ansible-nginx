@@ -16,7 +16,7 @@ nginx_client_max_body_size: "10m"
 
 nginx_rlimit_nofile: false
 
-nginx_keepalive_timeout: "{{ _nginx_keepalive_timeout }}"
+nginx_keepalive_timeout: "{{ __nginx_keepalive_timeout }}"
 
 nginx_pid_path: "{{ __nginx_pid_path }}"
 
