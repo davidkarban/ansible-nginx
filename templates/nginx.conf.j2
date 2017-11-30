@@ -8,6 +8,14 @@ pid {{ nginx_pid_path }};
 worker_rlimit_nofile {{ nginx_rlimit_nofile }};
 
 {% endif %}
+
+{% if nginx_additional_main_config is defined %}
+### Additional main config from nginx_additional_main_config ###
+
+{{ nginx_additional_main_config }}
+
+### end of additional_main_config
+{% endif %}
 events {
 	worker_connections 1024;
 	# multi_accept on;
@@ -55,6 +63,14 @@ http {
 	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
 	gzip_disable "MSIE [1-6]\.(?!.*SV1)";
 
+{% if nginx_additional_http_config is defined %}
+### Automatically added from nginx_additional_http_config ###
+
+{{ nginx_additional_http_config }}
+
+### End of nginx_additional_http_config ###
+{% endif %}
+
 {% if passenger is defined and passenger %}
 	##
 	# Phusion Passenger config
@@ -72,10 +88,8 @@ http {
 {% if nginx_caching_proxy %}
 	proxy_cache_path  /var/cache/nginx  	levels=1:2    keys_zone=STATIC:10m
 						inactive=24h  max_size=10g;
-
-        # bigger file uploads
-        client_max_body_size 128M;
-
+{% endif %}
+{% if nginx_proxy or nginx_caching_proxy %}
         log_format upstreamlog '[$time_local] $remote_addr - $remote_user - $server_name  to: $upstream_addr: $request upstream_response_time $upstream_response_time msec $msec request_time $request_time';
 	access_log /var/log/nginx/upstream.log upstreamlog;
 {% endif %}

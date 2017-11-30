@@ -8,7 +8,9 @@
     state: present
     update_cache: yes
     cache_valid_time: 600
-  with_items: '{{ __nginx_pkgs }}'
+  with_items:
+    - "{{ __nginx_pkgs }}"
+    - "{{ nginx_additional_pkgs }}"
   environment:
     # prevent nginx from autostart after installation (do not know if work under systemd, worked before)
     RUNLEVEL: 1
@@ -18,7 +20,9 @@
   yum:
     name: "{{ item }}"
     state: present
-  with_items: '{{ __nginx_pkgs }}'
+  with_items:
+    - '{{ __nginx_pkgs }}'
+    - "{{ nginx_additional_pkgs }}"
   when: ansible_os_family == 'RedHat'
 
 - name: Ensure vhosts directory do exists
@@ -32,8 +36,31 @@
 - name: Load nginx caching proxy configuration if desired
   template:
     src: "caching_proxy.conf.j2"
-    dest: "{{ nginx_conf_dir }}/vhosts.d/caching_proxy.conf"
+    dest: "{{ __nginx_conf_dir }}/vhosts.d/caching_proxy.conf"
   when: nginx_caching_proxy
+
+- name: Ensure cache directory has proper permission
+  file:
+    path: "/var/cache/nginx"
+    state: directory
+    owner: nginx
+    mode: "0755"
+  when: nginx_caching_proxy
+
+- name: Load nginx proxy configuration if desired
+  template:
+    src: "proxy.conf.j2"
+    dest: "{{ __nginx_conf_dir }}/vhosts.d/proxy.conf"
+  when: nginx_proxy
+
+- name: Ensure nginx can proxy to another server if selinux is available
+  seboolean:
+    name: "httpd_can_network_connect"
+    persistent: yes
+    state: yes
+  when:
+    - nginx_caching_proxy
+    - ansible_selinux is defined and ansible_selinux.config_mode != "disabled"
 
 # Increase file open limits, if in caching proxy mode
 # limits, supported from ansible 2.0
@@ -53,8 +80,8 @@
 
 - name: Generate dhparam for SSL if not available
   command: openssl dhparam -out /etc/nginx/dhparam.pem 2048
-    args:
-      creates: "/etc/nginx/dhparam.pem"
+  args:
+    creates: "/etc/nginx/dhparam.pem"
 
 - name: Load up nginx configuration
   template:
