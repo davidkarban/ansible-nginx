@@ -36,7 +36,7 @@
 - name: Load nginx caching proxy configuration if desired
   template:
     src: "caching_proxy.conf.j2"
-    dest: "{{ __nginx_conf_dir }}/vhosts.d/caching_proxy.conf"
+    dest: "{{ __nginx_vhosts_dir }}/caching_proxy.conf"
   when: nginx_caching_proxy
 
 - name: Ensure cache directory has proper permission
