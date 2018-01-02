@@ -1,9 +1,11 @@
 ---
 nginx_ip: "*"
 nginx_ssl_ip: "*"
+nginx_ipv6_ip: false
+nginx_ipv6_ssl_ip: false
+
 nginx_port: 80
 nginx_ssl_port: 443
-
 ## basic settings
 nginx_owner: "{{ __nginx_owner }}"
 
@@ -34,3 +36,6 @@ nginx_caching_proxy: false
 nginx_uwsgi: false
 
 nginx_additional_pkgs: []
+
+nginx_redirect_to_https: true
+nginx_redirect_to_https_code: 302

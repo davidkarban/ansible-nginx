@@ -1,0 +1,11 @@
+# Ensure acme certificates are redirected properly
+# from: https://community.letsencrypt.org/t/how-to-nginx-configuration-to-enable-acme-challenge-support-on-all-http-virtual-hosts/5622
+location ^~ /.well-known/acme-challenge/ {
+    default_type "text/plain";
+    root         /var/www/acme;
+}
+
+location = /.well-known/acme-challenge/ {
+    return 404;
+}
+

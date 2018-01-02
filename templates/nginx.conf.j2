@@ -104,6 +104,17 @@ http {
 	# Virtual Host Configs
 	##
 
+{% if nginx_redirect_to_https %}
+    server {
+        listen {{ nginx_ip }}:80 default_server;
+{% if nginx_ipv6_ip %}        listen [{{ nginx_ipv6_ip }}]:80 default_server;
+{% endif %}
+        server_name _;
+
+        return {{ nginx_redirect_to_https_code }} https://$host$request_uri;
+    }
+{% endif %}
+
 	include /etc/nginx/conf.d/*.conf;
 	include {{ nginx_vhosts_dir }}/*;
 }

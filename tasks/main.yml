@@ -33,11 +33,11 @@
     group: root
     mode: 0755
 
-- name: Load nginx caching proxy configuration if desired
+- name: Load nginx proxy configuration if desired
   template:
-    src: "caching_proxy.conf.j2"
-    dest: "{{ __nginx_vhosts_dir }}/caching_proxy.conf"
-  when: nginx_caching_proxy
+    src: "proxy.conf.j2"
+    dest: "{{ __nginx_vhosts_dir }}/proxy.conf"
+  when: nginx_proxy or nginx_caching_proxy
 
 - name: Ensure cache directory has proper permission
   file:
@@ -46,12 +46,6 @@
     owner: nginx
     mode: "0755"
   when: nginx_caching_proxy
-
-- name: Load nginx proxy configuration if desired
-  template:
-    src: "proxy.conf.j2"
-    dest: "{{ __nginx_conf_dir }}/vhosts.d/proxy.conf"
-  when: nginx_proxy
 
 - name: Ensure nginx can proxy to another server if selinux is available
   seboolean:
@@ -91,6 +85,22 @@
     group: root
     mode: 0644
     backup: yes
+  notify: reload nginx
+
+- name: Ensure acme.sh configuration is installed
+  template:
+    src: "acme.conf.j2"
+    dest: "{{ __nginx_conf_dir }}/acme"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify: reload nginx
+
+- name: Ensure default vhost is removed
+  file:
+    path: "{{ __nginx_conf_dir }}conf.d/default.conf"
+    state: absent
   notify: reload nginx
 
 - name: Ensure nginx is started
