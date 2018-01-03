@@ -38,6 +38,7 @@
     src: "proxy.conf.j2"
     dest: "{{ __nginx_vhosts_dir }}/proxy.conf"
   when: nginx_proxy or nginx_caching_proxy
+  notify: reload nginx
 
 - name: Ensure cache directory has proper permission
   file:
