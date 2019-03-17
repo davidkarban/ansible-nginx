@@ -5,8 +5,7 @@
 - name: Install the nginx packages on Debian derivates
   package:
     name: 
-      - "{{ __nginx_pkgs }}"
-      - "{{ nginx_additional_pkgs }}"
+      - "{{ __nginx_pkgs + nginx_additional_pkgs }}"
     state: present
 
 - name: Ensure vhosts directory do exists
