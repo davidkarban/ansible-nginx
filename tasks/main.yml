@@ -2,7 +2,7 @@
 - name: Load the OS specific variables
   include_vars: "{{ ansible_os_family }}.yml"
 
-- name: Install the nginx packages on Debian derivates
+- name: Install the nginx packages 
   package:
     name: 
       - "{{ __nginx_pkgs + nginx_additional_pkgs }}"
