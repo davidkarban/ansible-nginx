@@ -4,8 +4,7 @@
 
 - name: Install the nginx packages 
   package:
-    name: 
-      - "{{ __nginx_pkgs + nginx_additional_pkgs }}"
+    name: "{{ __nginx_pkgs + nginx_additional_pkgs }}"
     state: present
 
 - name: Ensure vhosts directory do exists
