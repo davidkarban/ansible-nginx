@@ -113,7 +113,11 @@ http {
 {% endif %}
         server_name _;
 
-        return {{ nginx_redirect_to_https_code }} https://$host$request_uri;
+	include /etc/nginx/acme;
+
+	location / {
+	        return {{ nginx_redirect_to_https_code }} https://$host$request_uri;
+	}
     }
 {% endif %}
 
