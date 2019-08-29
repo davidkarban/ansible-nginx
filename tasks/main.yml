@@ -80,6 +80,11 @@
     backup: yes
   notify: reload nginx
 
+- name: Ensure acme dir do exists
+  file: 
+    path: "/var/www/acme/.well-known/acme-challenge"
+    state: directory
+
 - name: Ensure default vhost is removed
   file:
     path: "{{ __nginx_conf_dir }}conf.d/default.conf"
