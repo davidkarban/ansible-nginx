@@ -46,7 +46,9 @@ http {
 	# Logging Settings
 	##
 
-	access_log /var/log/nginx/access.log;
+{% if nginx_logformat is defined %}	log_format  {{ nginx_logformat.name }} {{ nginx_logformat.content }}
+{% enfid %}
+	access_log /var/log/nginx/access.log{% if nginx_logformat is defined %} {{ nginx_logformat.name }}{% endif %};
 	error_log /var/log/nginx/error.log {{ nginx_debug_level }};
 
 	##
