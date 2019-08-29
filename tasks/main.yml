@@ -73,7 +73,7 @@
 - name: Ensure acme.sh configuration is installed
   template:
     src: "acme.conf.j2"
-    dest: "{{ __nginx_conf_dir }}/acme"
+    dest: "{{ __nginx_conf_dir }}conf.d/acme.conf"
     owner: root
     group: root
     mode: 0644
